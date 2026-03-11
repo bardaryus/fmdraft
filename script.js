@@ -745,6 +745,10 @@ function renderMatchResult(result) {
 function playerAvatarUrl(name) {
   const player = PLAYERS_DB.find(p => p.name === name);
   if (player && player.img) {
+    // Wrap sofifa images in a CORS proxy to prevent GitHub Pages 403 Forbidden errors
+    if (player.img.includes('sofifa.net')) {
+        return `https://images.weserv.nl/?url=${encodeURIComponent(player.img)}`;
+    }
     return player.img;
   }
   const encoded = encodeURIComponent(name);
