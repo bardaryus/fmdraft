@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Futbol Draft Oyunu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <h1>Futbol Draft Oyunu</h1>
+      <p class="subtitle">Modern draft &amp; canlı maç simülasyonu</p>
+    </header>
+
+    <!-- Ana Menü -->
+    <section id="main-menu" class="main-menu-modern">
+      <div class="main-menu-hero">
+        <div class="hero-content">
+          <h2 class="hero-title">Efsanevi Kadronu Kur</h2>
+          <p class="hero-subtitle">
+            Dünyanın en iyi oyuncularını draft et, taktiğini belirle ve heyecan dolu maç simülasyonunu canlı izle.
+          </p>
+          <div class="hero-buttons">
+            <button id="btn-start-single" class="btn primary hero-btn">
+              <span class="btn-icon">👤</span> Tek Oyunculu Oyna
+            </button>
+            <button id="btn-host-online" class="btn accent hero-btn">
+              <span class="btn-icon">🌐</span> Oyun Kur (LAN / Online)
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Başlangıç Ekranı -->
+    <section id="start-screen" class="card hidden">
+      <h2>Yeni Oyun</h2>
+      <div class="form-row">
+        <label for="player-count">Oyuncu Sayısı</label>
+        <select id="player-count">
+          <option value="2">2 Oyuncu</option>
+          <option value="3">3 Oyuncu</option>
+          <option value="4">4 Oyuncu</option>
+        </select>
+      </div>
+
+      <div id="player-names-container"></div>
+
+      <p class="info-text">Her oyuncu 500M bütçe ile başlar ve 11 futbolcu seçer.</p>
+
+      <button id="start-draft-btn" class="btn primary">Draft Başlat</button>
+    </section>
+
+    <!-- Multiplayer Ekranı -->
+    <section id="multiplayer-screen" class="card hidden">
+      <h2>Oyun Kur / Odaya Katıl</h2>
+      <div id="mp-selection">
+        <button id="btn-create-room" class="btn accent">Oda Kur (Host)</button>
+        <button id="btn-join-room-ui" class="btn secondary">Odaya Katıl (Client)</button>
+      </div>
+
+      <div id="mp-host-ui" class="hidden" style="margin-top: 20px;">
+        <div class="form-row">
+          <label for="host-formation">Diziliş Seçin</label>
+          <select id="host-formation">
+            <option value="4-4-2">4-4-2</option>
+            <option value="4-3-3">4-3-3</option>
+            <option value="3-5-2">3-5-2</option>
+            <option value="4-2-3-1">4-2-3-1</option>
+            <option value="5-3-2">5-3-2</option>
+          </select>
+        </div>
+        <p class="info-text">Sen Host'sun. Oda Kodun:</p>
+        <h3 id="room-code-display" style="color: #21e57a; letter-spacing: 2px;">Oluşturuluyor...</h3>
+        <p class="info-text" style="margin-top:10px;">Bağlı Oyuncular:</p>
+        <ul id="connected-players-list" style="list-style:none; margin-bottom: 20px;">
+          <!-- Bağlı oyuncular buraya gelecek -->
+        </ul>
+        <button id="btn-start-mp-draft" class="btn primary" disabled>Oyuncuları Bekle...</button>
+      </div>
+
+      <div id="mp-join-ui" class="hidden" style="margin-top: 20px;">
+        <div class="form-row">
+          <label for="join-room-code">Oda Kodu</label>
+          <input type="text" id="join-room-code" placeholder="Host'un verdiği kodu gir" />
+        </div>
+        <div class="form-row">
+          <label for="join-player-name">Takım Adın</label>
+          <input type="text" id="join-player-name" placeholder="Örn: Takım B" />
+        </div>
+        <div class="form-row">
+          <label for="join-formation">Diziliş Seçin</label>
+          <select id="join-formation">
+            <option value="4-4-2">4-4-2</option>
+            <option value="4-3-3">4-3-3</option>
+            <option value="3-5-2">3-5-2</option>
+            <option value="4-2-3-1">4-2-3-1</option>
+            <option value="5-3-2">5-3-2</option>
+          </select>
+        </div>
+        <button id="btn-join-room" class="btn accent">Katıl</button>
+        <p id="join-status" class="info-text" style="color: #00c6ff; display:none;">Bağlanılıyor...</p>
+      </div>
+    </section>
+
+    <!-- Draft Ekranı -->
+    <section id="draft-screen" class="draft-layout hidden">
+      <div class="draft-left card">
+        <div class="draft-header">
+          <h2>Draft</h2>
+          <p id="turn-info"></p>
+          <p id="pick-progress" class="muted"></p>
+        </div>
+
+        <div class="filters">
+          <div class="form-row">
+            <label for="search-input">Oyuncu Ara</label>
+            <input id="search-input" type="text" placeholder="İsimle ara..." />
+          </div>
+          <div class="form-row">
+            <label for="position-filter">Pozisyon</label>
+            <select id="position-filter">
+              <option value="ALL">Hepsi</option>
+              <option value="GK">Kaleci</option>
+              <option value="DEF">Defans</option>
+              <option value="MID">Orta Saha</option>
+              <option value="FWD">Forvet</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="sort-filter">Sıralama</label>
+            <select id="sort-filter">
+              <option value="rating_desc">Rating (yüksek → düşük)</option>
+              <option value="price_asc">Fiyat (ucuz → pahalı)</option>
+              <option value="price_desc">Fiyat (pahalı → ucuz)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="player-list" class="player-list"></div>
+      </div>
+
+      <div class="draft-right card">
+        <h2>Takımlar</h2>
+        <div id="teams-container" class="teams-container"></div>
+      </div>
+    </section>
+
+    <!-- Maç Simülasyonu -->
+    <section id="match-section" class="card hidden">
+      <h2>Maç Simülasyonu</h2>
+      <p class="muted">Takımlar hazır. Maçı canlı izle!</p>
+      <button id="simulate-btn" class="btn accent">Maçı Simüle Et</button>
+      <div id="match-result" class="match-result"></div>
+    </section>
+  </div>
+
+  <!-- Tam ekran maç izleme overlay -->
+  <div id="match-overlay" class="match-overlay hidden">
+    <div class="match-overlay-inner">
+      <div class="match-overlay-topbar">
+        <button id="btn-exit-match" class="btn">Oyuna Dön</button>
+      </div>
+      <div id="live-match" class="live-match">
+        <div class="scoreboard">
+          <div class="scoreboard-teams">
+            <span id="score-team-a-name" class="score-team-name">Takım A</span>
+            <span id="score-team-a-goals" class="score-goals">0</span>
+            <span class="score-separator">-</span>
+            <span id="score-team-b-goals" class="score-goals">0</span>
+            <span id="score-team-b-name" class="score-team-name">Takım B</span>
+          </div>
+          <div class="scoreboard-meta">
+            <span>DK: <span id="score-minute">0'</span></span>
+          </div>
+        </div>
+
+        <div class="pitch-wrapper">
+          <!-- Phaser Canvas will be injected here -->
+          <div id="phaser-game-container"></div>
+        </div>
+
+        <div class="live-stats">
+          <div class="live-stat">
+            <div>Şutlar</div>
+            <div><span id="shots-a">0</span> - <span id="shots-b">0</span></div>
+          </div>
+          <div class="live-stat">
+            <div>Topa Sahip Olma</div>
+            <div><span id="possession-a">50</span>% - <span id="possession-b">50</span>%</div>
+          </div>
+        </div>
+
+        <div id="live-message" class="live-message muted"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Maç Sonu Ekranı Modal -->
+  <div id="post-match-modal" class="match-overlay hidden" style="z-index: 60;">
+    <div class="card" style="width: min(500px, 90%); text-align: center;">
+      <h2 style="color: #21e57a; font-size: 1.8rem; margin-bottom: 5px;">Maç Sona Erdi!</h2>
+      <div id="pm-score" style="font-size: 2rem; font-weight: 800; margin: 15px 0;">A 0 - 0 B</div>
+      <div id="pm-points-info" style="color: #a4acd6; margin-bottom: 20px;"></div>
+      
+      <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <button id="btn-pm-rematch" class="btn primary">Aynı Kadroyla Rövanş</button>
+        <button id="btn-pm-newdraft" class="btn accent">Yeni Kadro Kur (Draft)</button>
+        <button id="btn-pm-exit" class="btn secondary">Çıkış (Ana Menü)</button>
+      </div>
+
+      <div id="pm-waiting-message" class="info-text hidden" style="margin-top: 15px; color: #00c6ff;">
+        Host'un kararı bekleniyor...
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script src="phaser-match.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
+
